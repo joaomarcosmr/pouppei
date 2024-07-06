@@ -1,20 +1,13 @@
-const mongoose = require("mongoose");
+const { Pool } = require('pg')
 const dbUser = process.env.DB_USER;
 const dbPassword = process.env.DB_PASS;
 
-const conn = async () => {
-	try {
-		const dbConn = await mongoose.connect(
-			`mongodb+srv://${dbUser}:${dbPassword}@pouppei.lgm4nho.mongodb.net/?retryWrites=true&w=majority&appName=pouppei`
-		);
-		console.log("Conectou ao banco de dados!");
+const pool = new Pool({
+	user: dbUser,
+	host: 'localhost',
+	database: 'pouppei',
+	password: dbPassword,
+	port: 5432,
+});
 
-		return dbConn;
-	} catch (error) {
-		console.log(error);
-	}
-};
-
-conn();
-
-module.exports = conn;
+module.exports = pool;
