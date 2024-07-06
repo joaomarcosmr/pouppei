@@ -1,16 +1,17 @@
-const User = require("../models/User");
+const User = require('../models/User')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { generateToken } = require('../utils/auth');
 
 const register = async (req, res) => {
 	try {
-		const { username, email, password, ...data } = req.body;
+		const { username, email, password } = req.body;
 
 		if (!username || !email || !password) {
 			return res.status(400).send({ message: "É necessário preencher todos os campos obrigatórios" });
 		}
 
-		const existUser = await User.findOne({ email });
+		const existUser = await User.findUserByEmail(email)
 
 		if (existUser) {
 			return res.status(400).json({ message: "Usuário já existe" });
@@ -18,18 +19,13 @@ const register = async (req, res) => {
 
 		const hashedPassword = await bcrypt.hash(password, 10);
 
-		const createNewUser = await User.create({
-			username,
-			email,
-			password: hashedPassword,
-			data
-		});
+		const createNewUser = await User.createUser(username, email, hashedPassword);
 
 		if (!createNewUser) {
 			return res.status(422).json({ message: "Ocorreu um erro" });
 		}
 
-		res.status(201).json({ message: "Usuário criado com sucesso!" });
+		res.status(201).json({ message: "Usuário criado com sucesso!", user: createNewUser });
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: 'Erro no servidor.', error });
@@ -40,47 +36,51 @@ const login = async (req, res) => {
 	try {
 		const { email, password } = req.body;
 
-		if (!email || !password) {
-			return res.status(422).json({ message: "É preciso informar o campo de e-mail ou senha" })
+		if (!email, !password) {
+			res.status(400).json({ message: "É necessário preencher todos os campos!" })
 		}
 
-		const user = await User.findOne({ email });
+		const userExists = await User.findUserByEmail(email)
 
-		if (!user) {
-			return res.status(404).json({ message: "Usuário não encontrado" });
+		if (!userExists) {
+			res.status(400).json({ message: "Usuário ou senha inválidos!" })
 		}
 
-		const isPasswordMatch = await bcrypt.compare(password, user.password);
+		const isPasswordValid = await bcrypt.compare(password, userExists.password);
 
-		if (!isPasswordMatch) {
-			return res.status(401).json({ message: "Credenciais inválidas" })
+		if (!isPasswordValid) {
+			res.status(400).json({ message: "Usuário ou senha inválidos!" })
 		}
 
-		const token = jwt.sign({ email: user.email }, process.env.SECRET_KEY, { expiresIn: '7d' });
+		const token = generateToken(userExists)
 
-		return res.status(200).json({ token })
+		res.status(200).json({ message: "Logado com sucesso", token })
 	} catch (error) {
-		console.log(error)
+		console.error(error);
 		res.status(500).json({ message: 'Erro no servidor.', error });
 	}
-};
+}
 
-const getCurrentUser = async (req, res) => {
-	// Implementação para obter o usuário atual
-};
+const getUserInfo = async (req, res) => {
+	try {
+		const userId = req.user.id
 
-const update = async (req, res) => {
-	// Implementação para atualizar usuário
-};
+		const user = await User.getUserById(userId)
 
-const getUserById = async (req, res) => {
-	// Implementação para obter usuário por ID
-};
+		if (!user) {
+			return res.status(404).json({ message: "Usuário não existe." })
+		}
+
+		res.status(200).json(user)
+
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: 'Erro no servidor.', error });
+	}
+}
 
 module.exports = {
 	register,
 	login,
-	getCurrentUser,
-	update,
-	getUserById,
+	getUserInfo
 };
