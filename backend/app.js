@@ -1,5 +1,7 @@
 require('dotenv').config()
 
+const pool = require('./database/db.js');
+
 const express = require('express')
 const cors = require('cors')
 
@@ -15,7 +17,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
 //routes
-const router = require('./routes/Router.js')
+const router = require('./routes/Router.js');
 
 app.use(router)
 
