@@ -79,8 +79,37 @@ const getUserInfo = async (req, res) => {
 	}
 }
 
+const updateUserInfo = async (req, res) => {
+	try {
+		const id = req.params.id
+		const { username, email, password } = req.body;
+
+		if (!username, !email, !password) {
+			res.status(400).json({ message: "É necessário preencher todos os campos!" })
+		}
+
+		if (isNaN(id)) {
+			return res.status(400).json({ message: "Invalid user ID." });
+		}
+
+		const hashedPassword = await bcrypt.hash(password, 10);
+
+		const userUpdated = await User.updateUser(id, username, email, hashedPassword);
+
+		if (!userUpdated) {
+			return res.status(404).json({ message: "Usuário não encontrado." });
+		}
+
+		return res.status(200).json({ message: "Usuário atualizado com sucesso!", user: userUpdated });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: 'Server error.', error });
+	}
+};
+
 module.exports = {
 	register,
 	login,
-	getUserInfo
+	getUserInfo,
+	updateUserInfo
 };
