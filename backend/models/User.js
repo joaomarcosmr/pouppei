@@ -86,6 +86,19 @@ class User {
 			throw error;
 		}
 	}
+
+	static async deleteUser(id) {
+		try {
+			const query = `DELETE FROM users
+										 WHERE id = $1;`
+			const values = [id]
+			const result = pool.query(query, values)
+			return result.rowCount > 0
+		} catch (error) {
+			console.log(error)
+			throw error;
+		}
+	}
 }
 
 module.exports = User;

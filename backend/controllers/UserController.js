@@ -1,6 +1,5 @@
 const User = require('../models/User')
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const { generateToken } = require('../utils/auth');
 
 const register = async (req, res) => {
@@ -123,10 +122,28 @@ const updateUserInfo = async (req, res) => {
 	}
 };
 
+const deleteUser = (req, res) => {
+	try {
+		const id = req.params.id
+
+		const deletedUser = User.deleteUser(id)
+
+		if (!deletedUser) {
+			return res.status(404).json({ message: "Usuário não encontrado." });
+		}
+
+		return res.status(200).json({ message: "Usuário deletado com sucesso!" });
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: 'Server error.', error });
+	}
+}
+
 module.exports = {
 	register,
 	login,
 	getUserInfo,
 	updateUserInfo,
-	getAllUsers
+	getAllUsers,
+	deleteUser
 };
