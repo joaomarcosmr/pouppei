@@ -13,7 +13,7 @@ class User {
 		try {
 			const query = 'SELECT * FROM users;';
 			const result = await pool.query(query);
-			return result.rows.map(row => new User(row.id, row.username, row.email, row.created_at));
+			return result.rows.map(row => new User(row.id, row.username, row.email, row.password, row.createdAt));
 		} catch (error) {
 			console.log(error);
 			throw error;
