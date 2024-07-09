@@ -2,7 +2,9 @@ const Category = require("../models/Categories");
 
 const getAllCategories = async (req, res) => {
 	try {
-		const categories = await Category.getAllCategories();
+		const userId = req.user.id;
+
+		const categories = await Category.getAllCategories(userId);
 
 		if (!categories) {
 			return res.status(404).json({ message: "Nenhuma categoria encontrada" });
@@ -17,9 +19,10 @@ const getAllCategories = async (req, res) => {
 
 const getCategoryById = async (req, res) => {
 	try {
+		const userId = req.user.id;
 		const categoryId = req.params.id;
 
-		const category = await Category.getCategoryById(categoryId);
+		const category = await Category.getCategoryById(categoryId, userId);
 
 		if (!category) {
 			return res.status(404).json({ message: "Categoria não encontrada" });
@@ -34,13 +37,14 @@ const getCategoryById = async (req, res) => {
 
 const createCategory = async (req, res) => {
 	try {
+		const userId = req.user.id;
 		const { name, color, emoji } = req.body;
 
 		if (!name || !color || !emoji) {
 			return res.status(400).json({ message: "Preencha todos os campos." });
 		}
 
-		const category = await Category.createCategory(name, color, emoji);
+		const category = await Category.createCategory(userId, name, color, emoji);
 
 		if (!category) {
 			return res.status(400).json({
@@ -57,6 +61,7 @@ const createCategory = async (req, res) => {
 
 const updateCategory = async (req, res) => {
 	try {
+		const userId = req.user.id;
 		const categoryId = req.params.id;
 		const { name, color, emoji } = req.body;
 
@@ -64,7 +69,7 @@ const updateCategory = async (req, res) => {
 			return res.status(400).json({ message: "Preencha todos os campos." });
 		}
 
-		const category = await Category.updateCategory(categoryId, name, color, emoji);
+		const category = await Category.updateCategory(categoryId, userId, name, color, emoji);
 
 		if (!category) {
 			return res.status(400).json({
@@ -81,9 +86,10 @@ const updateCategory = async (req, res) => {
 
 const deleteCategory = async (req, res) => {
 	try {
+		const userId = req.user.id;
 		const categoryId = req.params.id;
 
-		const deleted = await Category.deleteCategory(categoryId);
+		const deleted = await Category.deleteCategory(categoryId, userId);
 
 		if (!deleted) {
 			return res.status(400).json({ message: "Erro ao deletar categoria." });

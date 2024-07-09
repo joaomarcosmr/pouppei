@@ -1,38 +1,41 @@
 const pool = require('../database/db')
 
 class Category {
-	constructor(id, name, color, emoji, createdAt) {
+	constructor(id, user_id, name, color, emoji, created_at) {
 		this.id = id;
+		this.user_id = user_id;
 		this.name = name;
 		this.color = color;
 		this.emoji = emoji;
-		this.createdAt = createdAt;
+		this.created_at = created_at;
 	}
 
-	static async getAllCategories() {
+	static async getAllCategories(user_id) {
 		try {
-			const query = 'SELECT * FROM categories;';
-			const result = await pool.query(query);
+			const query = `SELECT * FROM categories
+										 WHERE user_id = $1;`;
+			const values = [user_id]
+			const result = await pool.query(query, values);
 			const rows = result.rows;
 			if (!rows) {
 				return null;
 			}
-			return rows.map(row => new Category(row.id, row.name, row.color, row.emoji, row.createdAt));
+			return rows.map(row => new Category(row.id, row.user_id, row.name, row.color, row.emoji, row.created_at));
 		} catch (error) {
 			console.log(error);
 			throw error;
 		}
 	}
 
-	static async getCategoryById(id) {
+	static async getCategoryById(id, user_id) {
 		try {
 			const query = `SELECT * FROM categories
-										 WHERE id = $1;`
-			const values = [id]
+										 WHERE id = $1 AND user_id = $2;`
+			const values = [id, user_id]
 			const result = await pool.query(query, values)
 			const row = result.rows[0]
 			if (row) {
-				return new Category(row.id, row.name, row.color, row.emoji, row.createdAt)
+				return new Category(row.id, row.user_id, row.name, row.color, row.emoji, row.created_at)
 			}
 			return null
 		} catch (error) {
@@ -41,45 +44,45 @@ class Category {
 		}
 	}
 
-	static async createCategory(name, color, emoji) {
+	static async createCategory(user_id, name, color, emoji) {
 		try {
-			const query = `INSERT INTO categories (name, color, emoji)
-										 VALUES($1, $2, $3)
+			const query = `INSERT INTO categories (user_id, name, color, emoji)
+										 VALUES($1, $2, $3, $4)
 										 RETURNING *;`
-			const values = [name, color, emoji]
+			const values = [user_id, name, color, emoji]
 			const result = await pool.query(query, values)
 			const row = result.rows[0]
-			return new Category(row.id, row.name, row.color, row.emoji, row.createdAt)
+			return new Category(row.id, row.user_id, row.name, row.color, row.emoji, row.created_at)
 		} catch (error) {
 			console.log(error)
 			throw error;
 		}
 	}
 
-	static async updateCategory(id, name, color, emoji) {
+	static async updateCategory(id, user_id, name, color, emoji) {
 		try {
 			const query = `UPDATE categories
 										 SET name = $1, color = $2, emoji = $3
-										 WHERE id = $4
+										 WHERE id = $4 AND user_id = $5
 										 RETURNING *;`
-			const values = [name, color, emoji, id]
+			const values = [name, color, emoji, id, user_id]
 			const result = await pool.query(query, values)
 			if (result.rowCount === 0) {
 				return null
 			}
 			const row = result.rows[0]
-			return new Category(row.id, row.name, row.color, row.emoji, row.createdAt)
+			return new Category(row.id, row.user_id, row.name, row.color, row.emoji, row.created_at)
 		} catch (error) {
 			console.log(error)
 			throw error;
 		}
 	}
 
-	static async deleteCategory(id) {
+	static async deleteCategory(id, user_id) {
 		try {
 			const query = `DELETE FROM categories
-										 WHERE id = $1;`
-			const values = [id]
+										 WHERE id = $1 AND user_id = $2;`
+			const values = [id, user_id]
 			const result = await pool.query(query, values)
 			return result.rowCount > 0
 		} catch (error) {

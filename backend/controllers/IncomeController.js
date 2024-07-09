@@ -1,11 +1,13 @@
 const Income = require('../models/Income');
 
-const getAllIcomes = async (req, res) => {
+const getAllIncomes = async (req, res) => {
 	try {
-		const incomes = await Income.getAllIncomes();
+		const userId = req.user.id;
+
+		const incomes = await Income.getAllincome(userId);
 
 		if (!incomes) {
-			return res.status(404).json({ message: 'Nenhuma categoria encontrada' });
+			return res.status(404).json({ message: 'Nenhuma receita encontrada' });
 		}
 
 		res.status(200).json(incomes);
@@ -17,16 +19,17 @@ const getAllIcomes = async (req, res) => {
 
 const getIncomebyId = async (req, res) => {
 	try {
+		const userId = req.user.id;
 		const incomeId = req.params.id
 
 		if (incomeId === undefined) {
 			return res.status(400).json({ message: 'ID não informado' })
 		}
 
-		const income = await Income.getIncomebyId(incomeId)
+		const income = await Income.getIncomebyId(incomeId, userId)
 
 		if (!income) {
-			return res.status(404).json({ message: 'Categoria não encontrada' })
+			return res.status(404).json({ message: 'Receita não encontrada' })
 		}
 
 		res.status(200).json(income)
@@ -38,16 +41,17 @@ const getIncomebyId = async (req, res) => {
 
 const createincome = async (req, res) => {
 	try {
+		const userId = req.user.id;
 		const { name, color, emoji } = req.body
 
 		if (!name || !color || !emoji) {
 			return res.status(400).json({ message: 'Preencha todos os campos.' })
 		}
 
-		const income = await Income.createIncome(name, color, emoji)
+		const income = await Income.createIncome(userId, name, color, emoji)
 
 		if (!income) {
-			return res.status(400).json({ message: 'Erro ao criar categoria.' })
+			return res.status(400).json({ message: 'Erro ao criar receita.' })
 		}
 
 		res.status(201).json(income)
@@ -59,6 +63,7 @@ const createincome = async (req, res) => {
 
 const updateIcome = async (req, res) => {
 	try {
+		const userId = req.user.id;
 		const incomeId = req.params.id
 		const { name, color, emoji } = req.body
 
@@ -70,10 +75,10 @@ const updateIcome = async (req, res) => {
 			return res.status(400).json({ message: 'Preencha todos os campos.' })
 		}
 
-		const income = await Income.updateIncome(incomeId, name, color, emoji)
+		const income = await Income.updateIncome(incomeId, userId, name, color, emoji)
 
 		if (!income) {
-			return res.status(400).json({ message: 'Erro ao atualizar categoria.' })
+			return res.status(400).json({ message: 'Erro ao atualizar receita.' })
 		}
 
 		res.status(200).json(income)
@@ -85,19 +90,20 @@ const updateIcome = async (req, res) => {
 
 const deleteIncome = async (req, res) => {
 	try {
+		const userId = req.user.id;
 		const incomeId = req.params.id
 
 		if (!incomeId) {
 			return res.status(400).json({ message: 'ID não informado' })
 		}
 
-		const income = await Income.deleteIncome(incomeId)
+		const income = await Income.deleteIncome(incomeId, userId)
 
 		if (!income) {
-			return res.status(404).json({ message: 'Categoria não encontrada' })
+			return res.status(404).json({ message: 'Receita não encontrada' })
 		}
 
-		res.status(200).json(income)
+		res.status(200).json({ message: "Receita deletada!" })
 	} catch (error) {
 		console.error(error)
 		res.status(500).json({ message: 'Erro no servidor.', error })
@@ -105,7 +111,7 @@ const deleteIncome = async (req, res) => {
 }
 
 module.exports = {
-	getAllIcomes,
+	getAllIncomes,
 	getIncomebyId,
 	createincome,
 	updateIcome,

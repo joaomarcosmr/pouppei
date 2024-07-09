@@ -1,12 +1,12 @@
 const pool = require('../database/db')
 
 class User {
-	constructor(id, username, email, password, createdAt) {
+	constructor(id, username, email, password, created_at) {
 		this.id = id;
 		this.username = username;
 		this.email = email;
 		this.password = password;
-		this.createdAt = createdAt;
+		this.created_at = created_at;
 	}
 
 	static async getAllUsers() {
