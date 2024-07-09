@@ -89,7 +89,7 @@ const deleteCategory = async (req, res) => {
 			return res.status(400).json({ message: "Erro ao deletar categoria." });
 		}
 
-		res.status(204).end();
+		res.status(204).json({ message: "Categoria deletada com sucesso." });
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: "Erro no servidor.", error });
