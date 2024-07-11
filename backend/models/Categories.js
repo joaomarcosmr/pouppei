@@ -1,19 +1,21 @@
 const pool = require('../database/db')
 
 class Category {
-	constructor(id, user_id, name, color, emoji, created_at) {
+	constructor(id, user_id, name, color, emoji, created_at, deleted_at) {
 		this.id = id;
 		this.user_id = user_id;
 		this.name = name;
 		this.color = color;
 		this.emoji = emoji;
 		this.created_at = created_at;
+		this.deleted_at = deleted_at;
 	}
 
 	static async getAllCategories(user_id) {
 		try {
 			const query = `SELECT * FROM categories
-										 WHERE user_id = $1;`;
+										 WHERE user_id = $1
+										 AND deleted_at IS NULL;`;
 			const values = [user_id]
 			const result = await pool.query(query, values);
 			const rows = result.rows;
@@ -30,7 +32,9 @@ class Category {
 	static async getCategoryById(id, user_id) {
 		try {
 			const query = `SELECT * FROM categories
-										 WHERE id = $1 AND user_id = $2;`
+										 WHERE id = $1
+										 AND user_id = $2
+										 AND deleted_at IS NULL;`
 			const values = [id, user_id]
 			const result = await pool.query(query, values)
 			const row = result.rows[0]
@@ -63,7 +67,9 @@ class Category {
 		try {
 			const query = `UPDATE categories
 										 SET name = $1, color = $2, emoji = $3
-										 WHERE id = $4 AND user_id = $5
+										 WHERE id = $4 
+										 AND user_id = $5
+										 AND deleted_at IS NULL
 										 RETURNING *;`
 			const values = [name, color, emoji, id, user_id]
 			const result = await pool.query(query, values)
@@ -80,11 +86,19 @@ class Category {
 
 	static async deleteCategory(id, user_id) {
 		try {
-			const query = `DELETE FROM categories
-										 WHERE id = $1 AND user_id = $2;`
+			const query = `UPDATE categories
+										 SET deleted_at = NOW()
+										 WHERE id = $1 
+										 AND user_id = $2
+										 AND deleted_at IS NULL
+										 RETURNING *;`
 			const values = [id, user_id]
 			const result = await pool.query(query, values)
-			return result.rowCount > 0
+			const row = result.rows[0];
+			if (row) {
+				return row
+			}
+			return null;
 		} catch (error) {
 			console.log(error)
 			throw error;
