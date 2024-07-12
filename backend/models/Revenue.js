@@ -1,19 +1,19 @@
 const pool = require(`../database/db`);
+const table = `revenue`;
 
-class Income {
-	constructor(id, user_id, name, color, emoji, created_at, deleted_at) {
+class Revenue {
+	constructor(id, user_id, name, icon, created_at, deleted_at) {
 		this.id = id;
 		this.user_id = user_id;
 		this.name = name;
-		this.color = color;
-		this.emoji = emoji;
+		this.icon = icon;
 		this.created_at = created_at;
 		this.deleted_at = deleted_at;
 	}
 
-	static async getAllincome(user_id) {
+	static async getAllRevenue(user_id) {
 		try {
-			const query = `SELECT * FROM income
+			const query = `SELECT * FROM ${table}
 										 WHERE user_id = $1
 										 AND deleted_at IS NULL;`;
 			const values = [user_id]
@@ -22,16 +22,16 @@ class Income {
 			if (!row) {
 				return null;
 			}
-			return row.map(row => new Income(row.id, row.user_id, row.name, row.color, row.emoji, row.created_at));
+			return row.map(row => new Revenue(row.id, row.user_id, row.name, row.icon, row.created_at));
 		} catch (error) {
 			console.log(error);
 			throw error;
 		}
 	}
 
-	static async getIncomebyId(id, user_id) {
+	static async getRevenuebyId(id, user_id) {
 		try {
-			const query = `SELECT * FROM income
+			const query = `SELECT * FROM ${table}
 										 WHERE id = $1 
 										 AND user_id = $2
 										 AND deleted_at IS NULL;`;
@@ -39,7 +39,7 @@ class Income {
 			const result = await pool.query(query, values)
 			const row = result.rows[0];
 			if (row) {
-				return new Income(row.id, row.user_id, row.name, row.color, row.emoji, row.created_at);
+				return new Revenue(row.id, row.user_id, row.name, row.icon, row.created_at);
 			}
 			return null;
 		} catch (error) {
@@ -48,16 +48,16 @@ class Income {
 		}
 	}
 
-	static async createIncome(user_id, name, color, emoji) {
+	static async createRevenue(user_id, name, icon) {
 		try {
-			const query = `INSERT INTO income (user_id, name, color, emoji)
-										 VALUES($1, $2, $3, $4)
+			const query = `INSERT INTO ${table} (user_id, name, icon)
+										 VALUES($1, $2, $3)
 										 RETURNING *;`;
-			const values = [user_id, name, color, emoji];
+			const values = [user_id, name, icon];
 			const result = await pool.query(query, values);
 			const row = result.rows[0];
 			if (row) {
-				return new Income(row.id, row.user_id, row.name, row.color, row.emoji, row.created_at);
+				return new Revenue(row.id, row.user_id, row.name, row.icon, row.created_at);
 			}
 			return null;
 		} catch (error) {
@@ -66,19 +66,19 @@ class Income {
 		}
 	}
 
-	static async updateIncome(id, user_id, name, color, emoji) {
+	static async updateRevenue(id, user_id, name, icon) {
 		try {
-			const query = `UPDATE income
-										 SET name = $1, color = $2, emoji = $3
-										 WHERE id = $4 
-										 AND user_id = $5
+			const query = `UPDATE ${table}
+										 SET name = $1, icon = $2
+										 WHERE id = $3
+										 AND user_id = $4
 										 AND deleted_at IS NULL
 										 RETURNING *;`;
-			const values = [name, color, emoji, id, user_id];
+			const values = [name, icon, id, user_id];
 			const result = await pool.query(query, values);
 			const row = result.rows[0];
 			if (row) {
-				return new Income(row.id, row.user_id, row.name, row.color, row.emoji, row.created_at);
+				return new Revenue(row.id, row.user_id, row.name, row.icon, row.created_at);
 			}
 			return null;
 		} catch (error) {
@@ -87,9 +87,9 @@ class Income {
 		}
 	}
 
-	static async deleteIncome(id, user_id) {
+	static async deleteRevenue(id, user_id) {
 		try {
-			const query = `UPDATE income
+			const query = `UPDATE ${table}
 										 SET deleted_at = NOW()
 										 WHERE id = $1 
 										 AND user_id = $2
@@ -99,7 +99,7 @@ class Income {
 			const result = await pool.query(query, values);
 			const row = result.rows[0];
 			if (row) {
-				return new Income(row.id, row.user_id, row.name, row.color, row.emoji, row.created_at, row.deleted_at);
+				return new Revenue(row.id, row.user_id, row.name, row.icon, row.created_at);
 			}
 			return null;
 		} catch (error) {
@@ -109,4 +109,4 @@ class Income {
 	}
 }
 
-module.exports = Income;
+module.exports = Revenue;

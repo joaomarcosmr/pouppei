@@ -1,16 +1,19 @@
 const pool = require(`../database/db`);
+const table = `tag`;
 
 class Tags {
-	constructor(id, user_id, name, deleted_at) {
+	constructor(id, user_id, description, color, created_at, deleted_at) {
 		this.id = id;
 		this.user_id = user_id;
-		this.name = name;
+		this.description = description;
+		this.color = color;
+		this.created_at = created_at;
 		this.deleted_at = deleted_at;
 	}
 
 	static async getAllTags(user_id) {
 		try {
-			const query = `SELECT * FROM tags
+			const query = `SELECT * FROM ${table}
 											WHERE user_id = $1
 											AND deleted_at IS NULL;`;
 			const values = [user_id];
@@ -19,7 +22,7 @@ class Tags {
 			if (!rows) {
 				return null;
 			}
-			return rows.map(row => new Tags(row.id, row.user_id, row.name));
+			return rows.map(row => new Tags(row.id, row.user_id, row.description, row.color, row.created_at));
 		} catch (error) {
 			console.log(error);
 			throw error;
@@ -28,7 +31,7 @@ class Tags {
 
 	static async getTagById(user_id, id) {
 		try {
-			const query = `SELECT * FROM tags
+			const query = `SELECT * FROM ${table}
 											WHERE id = $1
 											AND user_id = $2
 											AND deleted_at IS NULL;`;
@@ -36,7 +39,7 @@ class Tags {
 			const result = await pool.query(query, values);
 			const row = result.rows[0];
 			if (row) {
-				return new Tags(row.id, row.user_id, row.name);
+				return new Tags(row.id, row.user_id, row.description, row.color, row.created_at);
 			}
 			return null;
 		} catch (error) {
@@ -45,16 +48,16 @@ class Tags {
 		}
 	}
 
-	static async createTag(user_id, name) {
+	static async createTag(user_id, description, color) {
 		try {
-			const query = `INSERT INTO tags (user_id, name)
-											VALUES($1, $2)
+			const query = `INSERT INTO ${table} (user_id, description, color)
+											VALUES($1, $2, $3)
 											RETURNING *;`;
-			const values = [user_id, name];
+			const values = [user_id, description, color];
 			const result = await pool.query(query, values);
 			const row = result.rows[0];
 			if (row) {
-				return new Tags(row.id, row.user_id, row.name);
+				return new Tags(row.id, row.user_id, row.description, row.color, row.created_at);
 			}
 			return null;
 		} catch (error) {
@@ -63,18 +66,19 @@ class Tags {
 		}
 	}
 
-	static async updateTag(id, user_id, name) {
+	static async updateTag(id, user_id, description, color) {
 		try {
-			const query = `UPDATE tags
-											SET name = $1
-											WHERE id = $2
-											AND user_id = $3
+			const query = `UPDATE ${table}
+											SET description = $1
+													color = $2
+											WHERE id = $3
+											AND user_id = $4
 											RETURNING *;`;
-			const values = [name, id, user_id];
+			const values = [description, color, id, user_id];
 			const result = await pool.query(query, values);
 			const row = result.rows[0];
 			if (row) {
-				return new Tags(row.id, row.user_id, row.name);
+				return new Tags(row.id, row.user_id, row.description, row.color, row.created_at);
 			}
 			return null;
 		} catch (error) {
@@ -85,7 +89,7 @@ class Tags {
 
 	static async deleteTag(id, user_id) {
 		try {
-			const query = `UPDATE tags
+			const query = `UPDATE ${table}
 											SET deleted_at = NOW()
 											WHERE id = $1
 											AND user_id = $2
@@ -94,7 +98,7 @@ class Tags {
 			const result = await pool.query(query, values);
 			const row = result.rows[0];
 			if (row) {
-				return new Tags(row.id, row.user_id, row.name, row.deleted_at);
+				return new Tags(row.id, row.user_id, row.description, row.color, row.created_at);
 			}
 			return null;
 		} catch (error) {
