@@ -4,7 +4,7 @@ const { generateToken } = require('../utils/auth');
 
 const register = async (req, res) => {
 	try {
-		const { username, email, password } = req.body;
+		const { username, email, password, telephone, birth_date } = req.body;
 
 		if (!username || !email || !password) {
 			return res.status(400).send({ message: "É necessário preencher todos os campos obrigatórios" });
@@ -18,7 +18,7 @@ const register = async (req, res) => {
 
 		const hashedPassword = await bcrypt.hash(password, 10);
 
-		const createNewUser = await User.createUser(username, email, hashedPassword);
+		const createNewUser = await User.createUser(username, email, hashedPassword, telephone, birth_date);
 
 		if (!createNewUser) {
 			return res.status(422).json({ message: "Ocorreu um erro" });
@@ -97,7 +97,7 @@ const getUserInfo = async (req, res) => {
 const updateUserInfo = async (req, res) => {
 	try {
 		const id = req.params.id
-		const { username, email, password } = req.body;
+		const { username, email, password, telephone, birth_date } = req.body;
 
 		if (!username, !email, !password) {
 			return res.status(400).json({ message: "É necessário preencher todos os campos!" })
@@ -109,7 +109,7 @@ const updateUserInfo = async (req, res) => {
 
 		const hashedPassword = await bcrypt.hash(password, 10);
 
-		const userUpdated = await User.updateUser(id, username, email, hashedPassword);
+		const userUpdated = await User.updateUser(id, username, email, hashedPassword, telephone, birth_date);
 
 		if (!userUpdated) {
 			return res.status(404).json({ message: "Usuário não encontrado." });

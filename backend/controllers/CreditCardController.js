@@ -38,9 +38,9 @@ const getCreditCardById = async (req, res) => {
 const createCreditCard = async (req, res) => {
 	try {
 		const userId = req.user.id;
-		const { name, icon, credit_limit, due_date } = req.body;
+		const { name, icon, credit_limit, due_date, invoice } = req.body;
 
-		const creditCard = await CreditCard.createCreditCard(userId, name, icon, credit_limit, due_date);
+		const creditCard = await CreditCard.createCreditCard(userId, name, icon, credit_limit, due_date, invoice);
 
 		if (!creditCard) {
 			return res.status(400).json({ message: 'Erro ao criar cartão' });
@@ -57,9 +57,9 @@ const updateCreditCard = async (req, res) => {
 	try {
 		const userId = req.user.id;
 		const { id } = req.params;
-		const { name, icon, credit_limit, due_date } = req.body;
+		const { name, icon, credit_limit, due_date, invoice } = req.body;
 
-		const creditCard = await CreditCard.updateCreditCard(id, userId, name, icon, credit_limit, due_date);
+		const creditCard = await CreditCard.updateCreditCard(id, userId, name, icon, credit_limit, due_date, invoice);
 
 		if (!creditCard) {
 			return res.status(400).json({ message: 'Erro ao atualizar cartão' });

@@ -2,16 +2,16 @@ const express = require("express")
 const router = express.Router()
 
 // Controllers
-const { getAllIncomes, getIncomebyId, createincome, updateIcome, deleteIncome } = require("../controllers/IncomeController")
+const { getAllRevenue, getRevenuebyId, createRevenue, deleteRevenue, updateRevenue } = require("../controllers/RevenueController")
 
 //Middlewares
 const authGuard = require("../middlewares/authGuard")
 
 // Routes
-router.get("/", authGuard, getAllIncomes)
-router.get("/:id", authGuard, getIncomebyId)
-router.post("/", authGuard, createincome)
-router.put("/:id", authGuard, updateIcome)
-router.delete("/:id", authGuard, deleteIncome)
+router.get("/", authGuard, getAllRevenue)
+router.get("/:id", authGuard, getRevenuebyId)
+router.post("/", authGuard, createRevenue)
+router.put("/:id", authGuard, updateRevenue)
+router.delete("/:id", authGuard, deleteRevenue)
 
 module.exports = router
