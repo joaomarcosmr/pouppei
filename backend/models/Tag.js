@@ -69,7 +69,7 @@ class Tags {
 	static async updateTag(id, user_id, description, color) {
 		try {
 			const query = `UPDATE ${table}
-											SET description = $1
+											SET description = $1,
 													color = $2
 											WHERE id = $3
 											AND user_id = $4

@@ -71,7 +71,11 @@ class CreditCard {
 	static async updateCreditCard(id, user_id, name, icon, credit_limit, due_date, invoice) {
 		try {
 			const query = `UPDATE ${table}
-										 SET name = $1, icon = $2, credit_limit = $3, due_date = $4, invoice = $5
+										 SET name = $1, 
+										 		 icon = $2, 
+												 credit_limit = $3,
+												 due_date = $4, 
+												 invoice = $5
 										 WHERE id = $6
 										 AND user_id = $7 
 										 AND deleted_at IS NULL

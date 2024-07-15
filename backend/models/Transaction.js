@@ -41,19 +41,21 @@ class Transaction {
 
 	static async getTransactionById(id, user_id) {
 		try {
-			const query = `SELECT tr.*, 
-	           c.name AS category_name, 
-	           tg.name AS tag_name, 
-	           cc.name AS credit_card_name
-						 bk.name AS bank_account_name
-								FROM transactions tr
-								LEFT JOIN categories c ON tr.category_id = c.id
-								LEFT JOIN tags tg ON tr.tag_id = tg.id
-								LEFT JOIN credit_card cc ON tr.credit_card_id = cc.id
-								LEFT JOIN bank_account bk ON tr.bank_account_id = bk.id
-						WHERE tr.id = $1
-						AND tr.user_id = $2
-						AND tr.deleted_at IS NULL;`;
+			const query = `
+            SELECT tr.*, 
+                   c.name AS category_name, 
+                   tg.description AS tag_name, 
+                   cc.name AS credit_card_name,
+                   bk.name AS bank_account_name
+            FROM transactions tr
+            LEFT JOIN categories c ON tr.category_id = c.id
+            LEFT JOIN tag tg ON tr.tag_id = tg.id
+            LEFT JOIN credit_card cc ON tr.credit_card_id = cc.id
+            LEFT JOIN bank_account bk ON tr.bank_account_id = bk.id
+            WHERE tr.id = $1
+            AND tr.user_id = $2
+            AND tr.deleted_at IS NULL;
+        `;
 			const values = [id, user_id];
 			const result = await pool.query(query, values);
 			const row = result.rows[0];
@@ -67,10 +69,10 @@ class Transaction {
 					amount: row.amount,
 					date: row.date,
 					attachments: row.attachments,
-					last_transaction: row.last_transaction,
-					repeat_transaction_inverval: row.repeat_transaction_inverval,
 					tag_id: row.tag_id,
 					tag_name: row.tag_name,
+					repeat_transaction_interval: row.repeat_transaction_interval,
+					last_transaction: row.last_transaction,
 					credit_card_id: row.credit_card_id,
 					credit_card_name: row.credit_card_name,
 					bank_account_id: row.bank_account_id,
@@ -86,18 +88,18 @@ class Transaction {
 		}
 	}
 
-	static async createTransaction(user_id, category_id, description, amount, date, attachments, tag_id, repeat_transaction_inverval, last_transaction, credit_card_id, bank_account_id) {
+	static async createTransaction(user_id, category_id, description, amount, date, attachments, tag_id, repeat_transaction_interval, last_transaction, credit_card_id, bank_account_id) {
 		try {
-			const query = `INSERT INTO ${table} (user_id, category_id, description, amount, date, attachments, tag_id, repeat_transaction_inverval, last_transaction, credit_card_id, bank_account_id)
-											VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-											RETURNING *;`;
-			const values = [user_id, category_id, description, amount, date, attachments, tag_id, repeat_transaction_inverval, last_transaction, credit_card_id, bank_account_id];
+			const query = `
+            INSERT INTO transactions (user_id, category_id, description, amount, date, attachments, tag_id, repeat_transaction_interval, last_transaction, credit_card_id, bank_account_id)
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+            RETURNING *;
+        `;
+			const values = [user_id, category_id, description, amount, date, attachments, tag_id, repeat_transaction_interval, last_transaction, credit_card_id, bank_account_id];
 			const result = await pool.query(query, values);
 			const row = result.rows[0];
 			if (row) {
-				return new Transaction(row.id, row.user_id, row.category_id, row.description,
-					row.amount, row.date, row.attachments, row.tag_id, row.repeat_transaction_inverval,
-					row.last_transaction, row.credit_card_id, row.bank_account_id, row.created_at);
+				return new Transaction(row.id, row.user_id, row.category_id, row.description, row.amount, row.date, row.attachments, row.tag_id, row.repeat_transaction_interval, row.last_transaction, row.credit_card_id, row.bank_account_id, row.created_at);
 			}
 			return null;
 		} catch (error) {
@@ -105,6 +107,7 @@ class Transaction {
 			throw error;
 		}
 	}
+
 
 	static async updateTransaction(id, user_id, category_id, description, amount, date, attachments, tag_id, repeat_transaction_interval, last_transaction, credit_card_id, bank_account_id) {
 		try {
@@ -135,12 +138,12 @@ class Transaction {
 			const selectQuery = `
             SELECT ut.*,
                    c.name AS category_name,
-                   tg.name AS tag_name,
+                   tg.description AS tag_name,
                    cc.name AS credit_card_name,
                    ba.name AS bank_account_name
             FROM transactions ut
             LEFT JOIN categories c ON ut.category_id = c.id
-            LEFT JOIN tags tg ON ut.tag_id = tg.id
+            LEFT JOIN tag tg ON ut.tag_id = tg.id
             LEFT JOIN credit_card cc ON ut.credit_card_id = cc.id
             LEFT JOIN bank_account ba ON ut.bank_account_id = ba.id
             WHERE ut.id = $1

@@ -80,8 +80,8 @@ class User {
 			const query = `UPDATE ${table}
 										 SET name = $2,
 										 		 email = $3,
-												 password = $4
-												 telephone = $5
+												 password = $4,
+												 telephone = $5,
 												 birth_date = $6
 										 WHERE id = $1
 										 AND deleted_at IS NULL

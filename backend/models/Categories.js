@@ -2,13 +2,13 @@ const pool = require('../database/db')
 const table = `categories`
 
 class Category {
-	constructor(id, user_id, name, color, bank_account_id, credit_card_id, created_at) {
+	constructor(id, user_id, name, color, revenue_id, expense_id, created_at) {
 		this.id = id;
 		this.user_id = user_id;
 		this.name = name;
 		this.color = color;
-		this.bank_account_id = bank_account_id;
-		this.credit_card_id = credit_card_id;
+		this.revenue_id = revenue_id;
+		this.expense_id = expense_id;
 		this.created_at = created_at;
 	}
 
@@ -23,7 +23,7 @@ class Category {
 			if (!rows) {
 				return null;
 			}
-			return rows.map(row => new Category(row.id, row.user_id, row.name, row.color, row.bank_account_id, row.credit_card_id, row.created_at));
+			return rows.map(row => new Category(row.id, row.user_id, row.name, row.color, row.revenue_id, row.expense_id, row.created_at));
 		} catch (error) {
 			console.log(error);
 			throw error;
@@ -40,7 +40,7 @@ class Category {
 			const result = await pool.query(query, values)
 			const row = result.rows[0]
 			if (row) {
-				return new Category(row.id, row.user_id, row.name, row.color, row.bank_account_id, row.credit_card_id, row.created_at)
+				return new Category(row.id, row.user_id, row.name, row.color, row.revenue_id, row.expense_id, row.created_at)
 			}
 			return null
 		} catch (error) {
@@ -49,39 +49,39 @@ class Category {
 		}
 	}
 
-	static async createCategory(user_id, name, color, bank_account_id, credit_card_id) {
+	static async createCategory(user_id, name, color, revenue_id, expense_id) {
 		try {
-			const query = `INSERT INTO ${table} (user_id, name, color, bank_account_id, credit_card_id)
+			const query = `INSERT INTO ${table} (user_id, name, color, revenue_id, expense_id)
 										 VALUES($1, $2, $3, $4, $5)
 										 RETURNING *;`
-			const values = [user_id, name, color, bank_account_id, credit_card_id]
+			const values = [user_id, name, color, revenue_id, expense_id]
 			const result = await pool.query(query, values)
 			const row = result.rows[0]
-			return new Category(row.id, row.user_id, row.name, row.color, row.bank_account_id, row.credit_card_id, row.created_at)
+			return new Category(row.id, row.user_id, row.name, row.color, row.revenue_id, row.expense_id, row.created_at)
 		} catch (error) {
 			console.log(error)
 			throw error;
 		}
 	}
 
-	static async updateCategory(id, user_id, name, color, bank_account_id, credit_card_id) {
+	static async updateCategory(id, user_id, name, color, revenue_id, expense_id) {
 		try {
 			const query = `UPDATE ${table}
 										 SET name = $1, 
 												color = $2, 
-												bank_account_id = $3, 
-												credit_card_id = $4
-										 WHERE id = $4 
-												AND user_id = $5
+												revenue_id = $3, 
+												expense_id = $4
+										 WHERE id = $5
+												AND user_id = $6
 												AND deleted_at IS NULL
 										 RETURNING *;`
-			const values = [name, color, bank_account_id, credit_card_id, id, user_id]
+			const values = [name, color, revenue_id, expense_id, id, user_id]
 			const result = await pool.query(query, values)
 			if (result.rowCount === 0) {
 				return null
 			}
 			const row = result.rows[0]
-			return new Category(row.id, row.user_id, row.name, row.color, row.bank_account_id, row.credit_card_id, row.created_at)
+			return new Category(row.id, row.user_id, row.name, row.color, row.revenue_id, row.expense_id, row.created_at)
 		} catch (error) {
 			console.log(error)
 			throw error;

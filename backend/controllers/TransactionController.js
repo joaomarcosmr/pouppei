@@ -38,9 +38,9 @@ const getTransactionById = async (req, res) => {
 const createTransaction = async (req, res) => {
 	try {
 		const user_id = req.user.id;
-		const { category_id, description, amount, date, tag_id, credit_card_id } = req.body;
+		const { category_id, description, amount, date, attachments, tag_id, repeat_transaction_inverval, last_transaction, credit_card_id, bank_account_id } = req.body;
 
-		const transaction = await Transaction.createTransaction(user_id, category_id, description, amount, date, tag_id, credit_card_id);
+		const transaction = await Transaction.createTransaction(user_id, category_id, description, amount, date, attachments, tag_id, repeat_transaction_inverval, last_transaction, credit_card_id, bank_account_id);
 
 		if (!transaction) {
 			return res.status(400).json({ message: 'Erro ao criar transação' });
@@ -57,9 +57,9 @@ const updateTransaction = async (req, res) => {
 	try {
 		const user_id = req.user.id;
 		const { id } = req.params;
-		const { category_id, description, amount, date, tag_id, credit_card_id } = req.body;
+		const { category_id, description, amount, date, attachments, tag_id, repeat_transaction_inverval, last_transaction, credit_card_id, bank_account_id } = req.body;
 
-		const transaction = await Transaction.updateTransaction(id, user_id, category_id, description, amount, date, tag_id, credit_card_id);
+		const transaction = await Transaction.updateTransaction(id, user_id, category_id, description, amount, date, attachments, tag_id, repeat_transaction_inverval, last_transaction, credit_card_id, bank_account_id);
 
 		if (!transaction) {
 			return res.status(400).json({ message: 'Erro ao atualizar transação' });

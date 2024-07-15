@@ -38,13 +38,13 @@ const getCategoryById = async (req, res) => {
 const createCategory = async (req, res) => {
 	try {
 		const userId = req.user.id;
-		const { name, color, bank_account_id, credit_card_id } = req.body;
+		const { name, color, revenue_id, expense_id } = req.body;
 
-		if (!name || !color || (!bank_account_id || !credit_card_id)) {
+		if (!name || !color || (!revenue_id && !expense_id)) {
 			return res.status(400).json({ message: "Preencha todos os campos." });
 		}
 
-		const category = await Category.createCategory(userId, name, color, bank_account_id, credit_card_id);
+		const category = await Category.createCategory(userId, name, color, revenue_id, expense_id);
 
 		if (!category) {
 			return res.status(400).json({
@@ -63,13 +63,13 @@ const updateCategory = async (req, res) => {
 	try {
 		const userId = req.user.id;
 		const categoryId = req.params.id;
-		const { name, color, bank_account_id, credit_card_id } = req.body;
+		const { name, color, revenue_id, expense_id } = req.body;
 
-		if (!name || !color || !(bank_account_id || !credit_card_id)) {
+		if (!name || !color || (!revenue_id && !expense_id)) {
 			return res.status(400).json({ message: "Preencha todos os campos." });
 		}
 
-		const category = await Category.updateCategory(categoryId, userId, name, color, bank_account_id, credit_card_id);
+		const category = await Category.updateCategory(categoryId, userId, name, color, revenue_id, expense_id);
 
 		if (!category) {
 			return res.status(400).json({
