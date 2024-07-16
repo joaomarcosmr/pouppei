@@ -1,7 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import Category from '../../services/models/Categories';
 
 const Categories: React.FC = () => {
-	const [activeTab, setActiveTab] = useState('despesas');
+	const [activeTab, setActiveTab] = useState<string>('despesas');
+	const [despesasList, setDespesasList] = useState<string[]>([]);
+	const [receitasList, setReceitasList] = useState<string[]>([]);
+
+	useEffect(() => {
+		Category.pegarDadosDasCategorias()
+			.then((response) => {
+				console.log(response)
+			});
+	}, []);
 
 	const despesas = [
 		{ name: 'Alimentação', icon: '🍴' },

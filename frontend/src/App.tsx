@@ -1,16 +1,22 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import NavBar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import Categories from './pages/Categorias/Categorias';
 import BankAccounts from './pages/BankAccounts/BankAccounts';
 import Home from './pages/Home/Home';
+import CreditCards from './pages/CreditCards/CreditCards';
+import Tags from './pages/Tags/Tags';
+import Login from './pages/Login/Login';
+import Register from './pages/Register/Register';
 
 const App: React.FC = () => {
+	const token = localStorage.getItem('token');
+
 	return (
 		<Router>
 			<div className="App min-h-screen flex flex-col">
-				<NavBar />
+				{token && <NavBar />}
 				<MainContent />
 			</div>
 		</Router>
@@ -19,7 +25,16 @@ const App: React.FC = () => {
 
 const MainContent: React.FC = () => {
 	const location = useLocation();
-	const showSidebar = ['/categories', '/bank-accounts', '/tags'].includes(location.pathname);
+	const token = localStorage.getItem('token');
+	const showSidebar = ['/categories', '/bank-accounts', '/tags', '/credit-cards'].includes(location.pathname);
+
+	if (!token) {
+		return <Routes>
+			<Route path="*" element={<Navigate to="/login" />} />
+			<Route path="/login" element={<Login />} />
+			<Route path="/register" element={<Register />} />
+		</Routes>;
+	}
 
 	return (
 		<div className="flex flex-1 justify-center mt-8">
@@ -29,7 +44,9 @@ const MainContent: React.FC = () => {
 					<Route path="/" element={<Home />} />
 					<Route path="/categories" element={<Categories />} />
 					<Route path="/bank-accounts" element={<BankAccounts />} />
-					{/* Add more routes here */}
+					<Route path="/credit-cards" element={<CreditCards />} />
+					<Route path="/tags" element={<Tags />} />
+					<Route path="/login" element={<Login />} />
 				</Routes>
 			</div>
 		</div>
