@@ -1,18 +1,33 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import User from '../../services/models/Login';
+import { ILogin } from '../../Interfaces/Login';
 
 const Login: React.FC = () => {
-	const [username, setUsername] = useState('');
-	const [password, setPassword] = useState('');
+	const [infoUsers, setInfoUsers] = useState<ILogin>({ email: '', password: '' });
 	const navigate = useNavigate();
 
 	const handleLogin = (e: React.FormEvent) => {
 		e.preventDefault();
-		// Perform login logic here
-		// If successful, store the token and redirect to the home page
-		localStorage.setItem('token', 'your-token');
-		navigate('/');
+
+		User.login(infoUsers)
+			.then(() => {
+				navigate('/');
+			})
+			.catch((error) => {
+				console.error("Login failed:", error);
+			});
 	};
+
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { name, value } = e.target;
+		setInfoUsers((prevInfoUsers) => ({
+			...prevInfoUsers,
+			[name]: value
+		}));
+	};
+
+	console.log(infoUsers);
 
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -26,23 +41,29 @@ const Login: React.FC = () => {
 					<span className="mx-2 text-gray-400">ou</span>
 					<hr className="flex-grow border-t border-gray-300" />
 				</div>
-				<form>
+				<form onSubmit={handleLogin}>
 					<div className="mb-4">
 						<label className="block text-gray-700" htmlFor="email">Seu email</label>
 						<input
 							id="email"
+							name="email"
 							type="email"
 							className="w-full p-2 border border-gray-300 rounded mt-1"
 							placeholder="Seu email"
+							onChange={handleInputChange}
+							value={infoUsers.email}
 						/>
 					</div>
 					<div className="mb-4">
 						<label className="block text-gray-700" htmlFor="password">Sua senha</label>
 						<input
 							id="password"
+							name="password"
 							type="password"
 							className="w-full p-2 border border-gray-300 rounded mt-1"
 							placeholder="Sua senha"
+							onChange={handleInputChange}
+							value={infoUsers.password}
 						/>
 					</div>
 					<div className="text-right mb-4">
@@ -56,7 +77,7 @@ const Login: React.FC = () => {
 					</button>
 				</form>
 				<div className="text-center mt-6">
-					<a href="#" className="text-blue-500">Ainda não possui conta? Faça o cadastro!</a>
+					<NavLink to="/register" className="text-blue-500">Ainda não possui conta? Faça o cadastro!</NavLink>
 				</div>
 			</div>
 		</div>

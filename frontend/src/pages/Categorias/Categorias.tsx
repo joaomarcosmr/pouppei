@@ -1,46 +1,52 @@
 import React, { useEffect, useState } from 'react';
 import Category from '../../services/models/Categories';
+import CategoryModal from '../../components/modal/CategoryModal';
 
 const Categories: React.FC = () => {
 	const [activeTab, setActiveTab] = useState<string>('despesas');
+	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 	const [despesasList, setDespesasList] = useState<string[]>([]);
 	const [receitasList, setReceitasList] = useState<string[]>([]);
 
 	useEffect(() => {
 		Category.pegarDadosDasCategorias()
-			.then((response) => {
-				console.log(response)
+			.then((response: any) => {
+				const optionsDespesas = response.filter((categoria: any) => categoria.category_type === 'despesas');
+				const optionsReceitas = response.filter((categoria: any) => categoria.category_type === 'receitas');
+
+				setDespesasList(optionsDespesas);
+				setReceitasList(optionsReceitas);
 			});
-	}, []);
+	}, [isModalOpen]);
 
-	const despesas = [
-		{ name: 'Alimentação', icon: '🍴' },
-		{ name: 'Assinaturas e serviços', icon: '📰' },
-		{ name: 'Bares e restaurantes', icon: '🍸' },
-		{ name: 'Casa', icon: '🏠' },
-		{ name: 'Compras', icon: '🛍️' },
-		{ name: 'Cuidados pessoais', icon: '💅' },
-		{ name: 'Dívidas e empréstimos', icon: '💸' },
-		{ name: 'Educação', icon: '🎓' },
-		{ name: 'Família e filhos', icon: '👨‍👩‍👧‍👦' },
-		{ name: 'Impostos e Taxas', icon: '🧾' },
-		{ name: 'Investimentos', icon: '💼' },
-		{ name: 'Lazer e hobbies', icon: '🎨' },
-		{ name: 'Mercado', icon: '🛒' },
-	];
+	const handleSaveCategory = (category: { name: string; color: string; icon: string }) => {
+		if (activeTab === 'despesas') {
+			setDespesasList([...despesasList, category.name]);
+		} else {
+			setReceitasList([...receitasList, category.name]);
+		}
 
-	const receitas = [
-		{ name: 'Salário', icon: '💼' },
-		{ name: 'Investimentos', icon: '📈' },
-		{ name: 'Freelas', icon: '👨‍💻' },
-	];
+		setIsModalOpen(false);
+	};
+
+	const handleDeleteCategory = (category) => {
+		console.log('Apagar');
+	}
+
+	const handleEditCategory = (category) => {
+		console.log('Editar');
+	}
+
 
 	return (
 		<div className="flex flex-col w-full max-w-4xl p-8 bg-white rounded shadow-md ml-4">
 			<div className="sticky top-0 bg-white py-4">
 				<div className="flex justify-between items-center">
 					<h1 className="text-2xl font-bold">Categorias</h1>
-					<button className="bg-purple-600 text-white p-2 rounded">
+					<button
+						className="bg-purple-600 text-white p-2 rounded"
+						onClick={() => setIsModalOpen(true)}
+					>
 						+ Categoria de {activeTab === 'despesas' ? 'despesa' : 'receita'}
 					</button>
 				</div>
@@ -62,15 +68,15 @@ const Categories: React.FC = () => {
 			<div className="mt-4">
 				{activeTab === 'despesas' && (
 					<ul className="space-y-4">
-						{despesas.map((categoria) => (
+						{despesasList.map((categoria) => (
 							<li key={categoria.name} className="flex justify-between items-center">
 								<div className="flex items-center">
-									<span className="text-xl mr-4">{categoria.icon}</span>
+									<span className="text-xl mr-4">{categoria.color}</span>
 									<span>{categoria.name}</span>
 								</div>
 								<div className="flex space-x-4">
-									<a href="#" className="text-blue-500">arquivar</a>
-									<a href="#" className="text-blue-500">+ sub-categoria</a>
+									<a onClick={() => handleEditCategory(categoria)} className="text-blue-500">editar</a>
+									<a onClick={() => handleDeleteCategory(categoria)} className="text-blue-500">apagar</a>
 								</div>
 							</li>
 						))}
@@ -78,21 +84,27 @@ const Categories: React.FC = () => {
 				)}
 				{activeTab === 'receitas' && (
 					<ul className="space-y-4">
-						{receitas.map((categoria) => (
+						{receitasList.map((categoria) => (
 							<li key={categoria.name} className="flex justify-between items-center">
 								<div className="flex items-center">
 									<span className="text-xl mr-4">{categoria.icon}</span>
 									<span>{categoria.name}</span>
 								</div>
 								<div className="flex space-x-4">
-									<a href="#" className="text-blue-500">arquivar</a>
-									<a href="#" className="text-blue-500">+ sub-categoria</a>
+									<a onClick={() => handleEditCategory(categoria)} className="text-blue-500">editar</a>
+									<a onClick={() => handleDeleteCategory(categoria)} className="text-blue-500">apagar</a>
 								</div>
 							</li>
 						))}
 					</ul>
 				)}
 			</div>
+			<CategoryModal
+				categoryType={activeTab}
+				isOpen={isModalOpen}
+				onClose={() => setIsModalOpen(false)}
+				onSave={handleSaveCategory}
+			/>
 		</div>
 	);
 };

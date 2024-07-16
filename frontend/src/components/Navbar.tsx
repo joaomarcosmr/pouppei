@@ -9,14 +9,16 @@ const NavBar: React.FC = () => {
 				<img src={PouppeiLogo} alt="Pouppei" className="h-14" />
 				<div className="flex items-center space-x-4">
 					<Link to="/" className="text-white text-lg">visão geral</Link>
-					<Link to="/categories" className="text-white text-lg">lançamentos</Link>
+					<Link to="/" className="text-white text-lg">lançamentos</Link>
 					<Link to="/reports" className="text-white text-lg">relatórios</Link>
 					<Link to="/spending-limit" className="text-white text-lg">limite de gastos</Link>
 				</div>
 				<div className="flex items-center space-x-4">
-					<button className="text-white">
-						<i className="fas fa-cog"></i>
-					</button>
+					<Link to="/categories">
+						<button className="text-white">
+							<i className="fas fa-cog"></i>
+						</button>
+					</Link>
 					<button className="text-white">
 						<i className="fas fa-bell"></i>
 					</button>

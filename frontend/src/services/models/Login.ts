@@ -1,11 +1,13 @@
+import { ILogin, ILoginResponse, IRegister } from "../../Interfaces/Login";
 import api from "../api";
 
-class Login{
-		static async login(email: string, password: string){
+class User{
+		static async login({email, password}: ILogin): Promise<ILoginResponse>{
 				return new Promise((resolve, reject) => {
 						api
-						.post("users/login", {email, password})
+						.post("user/login", {email, password})
 						.then((response) => {
+								localStorage.setItem('token', response.data.token);
 								resolve(response.data);
 						})
 						.catch((erros) => {
@@ -17,10 +19,10 @@ class Login{
 				});
 		}
 
-		static async register(username: string, email: string, password: string){
+		static async register({username, email, password}: IRegister){
 				return new Promise((resolve, reject) => {
 						api
-						.post("users/register", {username, email, password})
+						.post("user/register", {username, email, password})
 						.then((response) => {
 								resolve(response.data);
 						})
@@ -56,4 +58,4 @@ class Login{
 		}
 }
 
-export default Login;
+export default User;

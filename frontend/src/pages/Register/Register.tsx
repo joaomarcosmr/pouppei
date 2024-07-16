@@ -1,34 +1,36 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Login from '../../services/models/Login';
+import { useNavigate, Link } from 'react-router-dom';
+import User from '../../services/models/Login';
 
 const Register: React.FC = () => {
-	const [infoUsers, setInfoUsers] = useState({});
+	const [infoUsers, setInfoUsers] = useState({ username: '', email: '', password: '' });
 	const navigate = useNavigate();
 
 	const handleRegister = (e: React.FormEvent) => {
 		e.preventDefault();
 
-		Login.register(infoUsers)
+		User.register(infoUsers)
 			.then((response) => {
 				console.log(response);
-			}
-			);
-
-		navigate('/login');
+				navigate('/login');
+			})
+			.catch((error) => {
+				console.error("Registration failed:", error);
+			});
 	};
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
-
-		setInfoUsers({
-			...infoUsers,
+		setInfoUsers((prevInfoUsers) => ({
+			...prevInfoUsers,
 			[name]: value
-		});
-	}
+		}));
+	};
+
+	console.log(infoUsers)
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gray-100" >
+		<div className="min-h-screen flex items-center justify-center bg-gray-100">
 			<div className="bg-white p-8 rounded shadow-md w-full max-w-md">
 				<div className="flex justify-center mb-6">
 					<img src="logo.png" alt="Pouppei" className="h-12" />
@@ -39,50 +41,58 @@ const Register: React.FC = () => {
 					<span className="mx-2 text-gray-400">ou</span>
 					<hr className="flex-grow border-t border-gray-300" />
 				</div>
-				<form>
+				<form onSubmit={handleRegister}>
 					<div className="mb-4">
-						<label className="block text-gray-700" htmlFor="email">Seu nome</label>
+						<label className="block text-gray-700" htmlFor="username">Seu nome</label>
 						<input
-							id="name"
+							id="username"
+							name="username"
 							type="text"
 							className="w-full p-2 border border-gray-300 rounded mt-1"
 							placeholder="Seu primeiro nome"
+							onChange={handleInputChange}
+							value={infoUsers.username}
 						/>
 					</div>
 					<div className="mb-4">
 						<label className="block text-gray-700" htmlFor="email">Seu email</label>
 						<input
 							id="email"
+							name="email"
 							type="email"
 							className="w-full p-2 border border-gray-300 rounded mt-1"
 							placeholder="Seu email"
+							onChange={handleInputChange}
+							value={infoUsers.email}
 						/>
 					</div>
 					<div className="mb-4">
 						<label className="block text-gray-700" htmlFor="password">Sua senha</label>
 						<input
 							id="password"
+							name="password"
 							type="password"
 							className="w-full p-2 border border-gray-300 rounded mt-1"
 							placeholder="Sua senha"
+							onChange={handleInputChange}
+							value={infoUsers.password}
 						/>
 					</div>
 					<div className="text-right mb-4">
-						<a href="#" className="text-blue-500">Esqueci minha senha</a>
+						<Link to="/forgot-password" className="text-blue-500">Esqueci minha senha</Link>
 					</div>
 					<button
 						type="submit"
 						className="w-full p-2 bg-purple-600 text-white rounded hover:bg-purple-700"
-						onClick={handleRegister}
 					>
 						Registrar
 					</button>
 				</form>
 				<div className="text-center mt-6">
-					<a href="#" className="text-blue-500">Ainda não possui conta? Faça o cadastro!</a>
+					<Link to="/login" className="text-blue-500">Ainda não possui conta? Faça o cadastro!</Link>
 				</div>
 			</div>
-		</div >
+		</div>
 	);
 };
 

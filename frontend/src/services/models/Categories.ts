@@ -8,7 +8,7 @@ class Category{
 			}
 
 			api
-			.get("categories/" + id)
+			.get("category/" + id)
 			.then((response) => {
 					resolve(response.data);
 			})
@@ -24,7 +24,7 @@ class Category{
 	static async pegarDadosDasCategorias() {
 		return new Promise((resolve, reject) => {
 			api
-			.get("categories")
+			.get("category")
 			.then((response) => {
 					resolve(response.data);
 			})
@@ -35,10 +35,10 @@ class Category{
 		});
 	}
 
-	static async criarCategoria(dados: any) {
+	static async createCategory(dados: any) {
 		return new Promise((resolve, reject) => {
 			api
-			.post("categories", dados)
+			.post("category", dados)
 			.then((response) => {
 					resolve(response.data);
 			})
@@ -54,7 +54,7 @@ class Category{
 	static async atualizarCategoria(id: number, dados: any) {
 		return new Promise((resolve, reject) => {
 			api
-			.put("categories/" + id, dados)
+			.put("category/" + id, dados)
 			.then((response) => {
 					resolve(response.data);
 			})
@@ -70,7 +70,7 @@ class Category{
 	static async deletarCategoria(id: number) {
 		return new Promise((resolve, reject) => {
 			api
-			.delete("categories/" + id)
+			.delete("category/" + id)
 			.then((response) => {
 					resolve(response.data);
 			})
