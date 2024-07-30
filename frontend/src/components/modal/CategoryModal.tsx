@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
+import Category from '../../services/models/Categories';
+import { CategoryResponse, ICategory } from '../../Interfaces/Category';
 
 interface CategoryModalProps {
 	isOpen: boolean;
-	onClose: () => void;
-	onSave: (category: ICategory) => void;
+	setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	categoryType: string;
-}
-
-interface ICategory {
-	name: string;
-	icon: string;
-	category_type: string;
+	setCategory: React.Dispatch<React.SetStateAction<ICategory>>;
+	category: ICategory;
+	isEditar: boolean;
+	setIsEditar: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const icons = [
@@ -18,8 +17,7 @@ const icons = [
 	'📈', '👨‍💻', '❤️', '⭐', '👤', '🎥', '🎵', '📷', '✉️', '🚩', '📚', '🚴', '🚗', '🚀', '🌟', '🔥', '⚡'
 ];
 
-const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, onClose, onSave, categoryType }) => {
-	const [category, setCategory] = useState<ICategory>({ name: '', icon: icons[0], category_type: categoryType });
+const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, setIsModalOpen, categoryType, setCategory, category, isEditar }) => {
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -36,9 +34,20 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, onClose, onSave, 
 		}));
 	};
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		onSave(category);
+
+		setCategory((prevCategory) => ({
+			...prevCategory,
+			category_type: categoryType,
+		}));
+
+		const res = await Category.createCategory(category) as CategoryResponse
+
+		if (res) {
+			setIsModalOpen(false);
+			return;
+		}
 	};
 
 	if (!isOpen) {
@@ -49,11 +58,11 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, onClose, onSave, 
 		<div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
 			<div className="bg-white p-8 rounded shadow-md w-full max-w-md">
 				<div className="flex justify-end">
-					<button onClick={onClose} className="text-gray-600 hover:text-gray-800">
+					<button onClick={() => setIsModalOpen(false)} className="text-gray-600 hover:text-gray-800">
 						&times;
 					</button>
 				</div>
-				<h2 className="text-center text-2xl font-bold mb-6">Criando categoria de {categoryType}</h2>
+				<h2 className="text-center text-2xl font-bold mb-6">{isEditar ? 'Criando' : 'Alterando'} categoria de {categoryType}</h2>
 				<form onSubmit={handleSubmit}>
 					<div className="mb-4">
 						<label className="block text-gray-700" htmlFor="name">Nome da categoria</label>
@@ -86,7 +95,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, onClose, onSave, 
 						type="submit"
 						className="w-full p-2 bg-purple-500 text-white rounded hover:bg-green-700"
 					>
-						Criar Categoria
+						{isEditar ? 'Criar Categoria' : 'Salvar Categoria'}
 					</button>
 				</form>
 			</div>

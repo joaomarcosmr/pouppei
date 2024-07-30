@@ -2,11 +2,11 @@ const pool = require('../database/db')
 const table = `categories`
 
 class Category {
-	constructor(id, user_id, name, color, category_type, created_at) {
+	constructor(id, user_id, name, icon, category_type, created_at) {
 		this.id = id;
 		this.user_id = user_id;
 		this.name = name;
-		this.color = color;
+		this.icon = icon;
 		this.category_type = category_type;
 		this.created_at = created_at;
 	}
@@ -22,7 +22,7 @@ class Category {
 			if (!rows) {
 				return null;
 			}
-			return rows.map(row => new Category(row.id, row.user_id, row.name, row.color, row.category_type, row.created_at));
+			return rows.map(row => new Category(row.id, row.user_id, row.name, row.icon, row.category_type, row.created_at));
 		} catch (error) {
 			console.log(error);
 			throw error;
@@ -45,7 +45,7 @@ class Category {
 					id: row.id,
 					user_id: row.user_id,
 					name: row.name,
-					color: row.color,
+					icon: row.icon,
 					category_type: row.category_type,
 					created_at: row.created_at
 				};
@@ -60,38 +60,38 @@ class Category {
 	}
 
 
-	static async createCategory(user_id, name, color, category_type) {
+	static async createCategory(user_id, name, icon, category_type) {
 		try {
-			const query = `INSERT INTO ${table} (user_id, name, color, category_type)
+			const query = `INSERT INTO ${table} (user_id, name, icon, category_type)
 										 VALUES($1, $2, $3, $4)
 										 RETURNING *;`
-			const values = [user_id, name, color, category_type]
+			const values = [user_id, name, icon, category_type]
 			const result = await pool.query(query, values)
 			const row = result.rows[0]
-			return new Category(row.id, row.user_id, row.name, row.color, row.category_type, row.created_at)
+			return new Category(row.id, row.user_id, row.name, row.icon, row.category_type, row.created_at)
 		} catch (error) {
 			console.log(error)
 			throw error;
 		}
 	}
 
-	static async updateCategory(id, user_id, name, color, category_type) {
+	static async updateCategory(id, user_id, name, icon, category_type) {
 		try {
 			const query = `UPDATE ${table}
 										 SET name = $1, 
-												color = $2, 
+												icon = $2, 
 												category_type = $3,
 										 WHERE id = $4
 												AND user_id = $5
 												AND deleted_at IS NULL
 										 RETURNING *;`
-			const values = [name, color, category_type, id, user_id]
+			const values = [name, icon, category_type, id, user_id]
 			const result = await pool.query(query, values)
 			if (result.rowCount === 0) {
 				return null
 			}
 			const row = result.rows[0]
-			return new Category(row.id, row.user_id, row.name, row.color, row.category_type, row.created_at)
+			return new Category(row.id, row.user_id, row.name, row.icon, row.category_type, row.created_at)
 		} catch (error) {
 			console.log(error)
 			throw error;

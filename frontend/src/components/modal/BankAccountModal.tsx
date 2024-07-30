@@ -1,42 +1,43 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BankAccountResponse, IBankAccount } from '../../Interfaces/BankAccount';
+import BankAccount from '../../services/models/BankAccount';
 
 interface BankAccountModalProps {
 	isOpen: boolean;
-	onClose: () => void;
-	onSave: (account: BankAccount) => void;
+	setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	setBankAccount: React.Dispatch<React.SetStateAction<IBankAccount>>;
+	bankAccount: IBankAccount;
 }
 
-interface BankAccount {
-	name: string;
-	excludeFromTotal: boolean;
-}
-
-const BankAccountModal: React.FC<BankAccountModalProps> = ({ isOpen, onClose, onSave }) => {
-	const [account, setAccount] = useState<BankAccount>({ name: '', excludeFromTotal: false });
+const BankAccountModal: React.FC<BankAccountModalProps> = ({ isOpen, setIsModalOpen, setBankAccount, bankAccount }) => {
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const { name, value } = e.target;
-		setAccount((prevAccount) => ({
+		const { name, value, type, checked } = e.target;
+
+		if (type === 'checkbox') {
+			setBankAccount((prevAccount) => ({
+				...prevAccount,
+				[name]: checked,
+			}));
+
+			return;
+		}
+
+		setBankAccount((prevAccount) => ({
 			...prevAccount,
 			[name]: value,
 		}));
 	};
 
-	const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const { name, checked } = e.target;
-		setAccount((prevAccount) => ({
-			...prevAccount,
-			[name]: checked,
-		}));
-	};
-
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 
-		// chamada api
+		const res = await BankAccount.createBankAccount(bankAccount) as BankAccountResponse
 
-		onSave(account);
-		onClose();
+		if (res) {
+			setIsModalOpen(false);
+			return;
+		}
 	};
 
 	if (!isOpen) {
@@ -47,7 +48,7 @@ const BankAccountModal: React.FC<BankAccountModalProps> = ({ isOpen, onClose, on
 		<div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
 			<div className="bg-white p-8 rounded shadow-md w-full max-w-md">
 				<div className="flex justify-end">
-					<button onClick={onClose} className="text-gray-600 hover:text-gray-800">
+					<button onClick={() => setIsModalOpen(false)} className="text-gray-600 hover:text-gray-800">
 						&times;
 					</button>
 				</div>
@@ -62,18 +63,18 @@ const BankAccountModal: React.FC<BankAccountModalProps> = ({ isOpen, onClose, on
 							className="w-full p-2 border border-gray-300 rounded mt-1"
 							placeholder="Dê um nome para identificar esta conta"
 							onChange={handleInputChange}
-							value={account.name}
+							value={bankAccount?.name}
 						/>
 					</div>
 					<div className="mb-4">
-						<label className="block text-gray-700" htmlFor="excludeFromTotal">
+						<label className="block text-gray-700" htmlFor="add_general_balance">
 							<input
-								id="excludeFromTotal"
-								name="excludeFromTotal"
+								id="add_general_balance"
+								name="add_general_balance"
 								type="checkbox"
 								className="mr-2"
-								onChange={handleCheckboxChange}
-								checked={account.excludeFromTotal}
+								onChange={handleInputChange}
+								checked={bankAccount?.add_general_balance || false}
 							/>
 							Não somar no Saldo Geral
 						</label>

@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import Category from '../../services/models/Categories';
 import CategoryModal from '../../components/modal/CategoryModal';
+import { ICategory } from '../../Interfaces/Category';
 
 const Categories: React.FC = () => {
 	const [activeTab, setActiveTab] = useState<string>('despesas');
+	const [category, setCategory] = useState<ICategory>({ id: 0, name: '', icon: '', category_type: activeTab });
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-	const [despesasList, setDespesasList] = useState<string[]>([]);
-	const [receitasList, setReceitasList] = useState<string[]>([]);
+	const [isEditar, setIsEditar] = useState<boolean>(false);
+	const [despesasList, setDespesasList] = useState<ICategory[]>([]);
+	const [receitasList, setReceitasList] = useState<ICategory[]>([]);
 
 	useEffect(() => {
 		Category.pegarDadosDasCategorias()
@@ -19,24 +22,32 @@ const Categories: React.FC = () => {
 			});
 	}, [isModalOpen]);
 
-	const handleSaveCategory = (category: { name: string; color: string; icon: string }) => {
-		if (activeTab === 'despesas') {
-			setDespesasList([...despesasList, category.name]);
-		} else {
-			setReceitasList([...receitasList, category.name]);
-		}
+	useEffect(() => {
+		setCategory((prevCategory) => ({
+			...prevCategory,
+			category_type: activeTab,
+		}));
+	}, [activeTab]);
 
-		setIsModalOpen(false);
+	const handleDeleteCategory = (category: ICategory) => {
+		Category.deletarCategoria(category.id)
+			.then(() => {
+				Category.pegarDadosDasCategorias()
+					.then((response: any) => {
+						const optionsDespesas = response.filter((categoria: any) => categoria.category_type === 'despesas');
+						const optionsReceitas = response.filter((categoria: any) => categoria.category_type === 'receitas');
+
+						setDespesasList(optionsDespesas);
+						setReceitasList(optionsReceitas);
+					});
+			});
 	};
 
-	const handleDeleteCategory = (category) => {
-		console.log('Apagar');
-	}
-
-	const handleEditCategory = (category) => {
-		console.log('Editar');
-	}
-
+	const handleEditCategory = (category: ICategory) => {
+		setIsEditar(true);
+		setCategory(category);
+		setIsModalOpen(true);
+	};
 
 	return (
 		<div className="flex flex-col w-full max-w-4xl p-8 bg-white rounded shadow-md ml-4">
@@ -44,7 +55,7 @@ const Categories: React.FC = () => {
 				<div className="flex justify-between items-center">
 					<h1 className="text-2xl font-bold">Categorias</h1>
 					<button
-						className="bg-purple-600 text-white p-2 rounded"
+						className="bg-purple-600 text-white p-2 rounded hover:bg-purple-700"
 						onClick={() => setIsModalOpen(true)}
 					>
 						+ Categoria de {activeTab === 'despesas' ? 'despesa' : 'receita'}
@@ -67,32 +78,40 @@ const Categories: React.FC = () => {
 			</div>
 			<div className="mt-4">
 				{activeTab === 'despesas' && (
-					<ul className="space-y-4">
+					<ul className="space-y-2">
 						{despesasList.map((categoria) => (
-							<li key={categoria.name} className="flex justify-between items-center">
+							<li key={categoria.name} className="flex justify-between items-center hover:bg-gray-100 p-4 border rounded transition-colors">
 								<div className="flex items-center">
-									<span className="text-xl mr-4">{categoria.color}</span>
+									<span className="text-xl mr-4">{categoria.icon}</span>
 									<span>{categoria.name}</span>
 								</div>
 								<div className="flex space-x-4">
-									<a onClick={() => handleEditCategory(categoria)} className="text-blue-500">editar</a>
-									<a onClick={() => handleDeleteCategory(categoria)} className="text-blue-500">apagar</a>
+									<button onClick={() => handleEditCategory(categoria)} className="text-blue-500 hover:text-blue-700">
+										Editar
+									</button>
+									<button onClick={() => handleDeleteCategory(categoria)} className="text-red-500 hover:text-red-700">
+										Deletar
+									</button>
 								</div>
 							</li>
 						))}
 					</ul>
 				)}
 				{activeTab === 'receitas' && (
-					<ul className="space-y-4">
+					<ul className="space-y-2">
 						{receitasList.map((categoria) => (
-							<li key={categoria.name} className="flex justify-between items-center">
+							<li key={categoria.name} className="flex justify-between items-center hover:bg-gray-100 p-4 border rounded transition-colors">
 								<div className="flex items-center">
 									<span className="text-xl mr-4">{categoria.icon}</span>
 									<span>{categoria.name}</span>
 								</div>
 								<div className="flex space-x-4">
-									<a onClick={() => handleEditCategory(categoria)} className="text-blue-500">editar</a>
-									<a onClick={() => handleDeleteCategory(categoria)} className="text-blue-500">apagar</a>
+									<button onClick={() => handleEditCategory(categoria)} className="text-blue-500 hover:text-blue-700">
+										Editar
+									</button>
+									<button onClick={() => handleDeleteCategory(categoria)} className="text-red-500 hover:text-red-700">
+										Deletar
+									</button>
 								</div>
 							</li>
 						))}
@@ -102,8 +121,11 @@ const Categories: React.FC = () => {
 			<CategoryModal
 				categoryType={activeTab}
 				isOpen={isModalOpen}
-				onClose={() => setIsModalOpen(false)}
-				onSave={handleSaveCategory}
+				setIsModalOpen={setIsModalOpen}
+				setCategory={setCategory}
+				category={category}
+				isEditar={isEditar}
+				setIsEditar={setIsEditar}
 			/>
 		</div>
 	);

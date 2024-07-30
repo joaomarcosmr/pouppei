@@ -1,28 +1,66 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import CreditCardModal from '../../components/modal/CreditCardModal';
+import { useNavigate } from 'react-router-dom';
+import { CreditCardResponse, ICreditCard } from '../../Interfaces/CreditCard';
+import CreditCard from '../../services/models/CreditCards';
 
-interface CreditCard {
-	name: string;
-	limit: number;
-	closeDay: number;
-	dueDay: number;
-	defaultAccount: string;
-}
-
-const CreditCards: React.FC = () => {
+const CreditCards = () => {
+	const navigate = useNavigate();
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-	const [cards, setCards] = useState<CreditCard[]>([
-		{ name: 'Conta inicial', limit: 0, closeDay: 1, dueDay: 1, defaultAccount: 'Conta inicial' },
-	]);
+	const [infoCreditCards, setInfoCreditCards] = useState<ICreditCard>(
+		{ name: 'Conta inicial', icon: '', invoice: 0, due_date: 1, credit_limit: 1 });
+	const [creditCardsList, setCreditCardsList] = useState<ICreditCard[] | null>([]);
+	const [updateList, setUpdateList] = useState<boolean>(true);
 
 	useEffect(() => {
+		if (updateList) {
+			const fetchData = async () => {
+				try {
+					const res = await CreditCard.pegarDadosCreditCards() as ICreditCard[];
 
-		// fetch
+					if (res) {
+						setCreditCardsList(res || []);
+					}
 
-	}, [])
+				} catch (error) {
+					console.error('Falha ao buscar os dados dos cartões de crédito:', error);
+				}
 
-	const handleSaveCard = (card: CreditCard) => {
-		setCards([...cards, card]);
+				setUpdateList(false);
+			};
+
+			fetchData();
+		}
+	}, [updateList])
+
+
+	const handleSaveCard = async () => {
+		const newCreditCard = await CreditCard.createCreditCard(infoCreditCards) as CreditCardResponse;
+
+		if (!newCreditCard) {
+			//toast.error('Erro ao criar cartão de crédito');
+			return;
+		}
+
+		//toast.success('Cartão de crédito criado com sucesso!');
+		setUpdateList(true);
+		setIsModalOpen(false);
+	};
+
+	const handleSeeCreditCard = (id: number) => {
+		navigate(`/credit-cards/${id}`);
+	};
+
+	const handleDeleteCard = async (id: number) => {
+		const deletedCreditCard = await CreditCard.deletarCreditCard(id) as CreditCardResponse;
+
+		if (!deletedCreditCard) {
+			//toast.error('Erro ao criar cartão de crédito');
+			return;
+		}
+
+		//toast.success('Cartão de crédito criado com sucesso!');
+		setUpdateList(true);
 	};
 
 	return (
@@ -32,29 +70,52 @@ const CreditCards: React.FC = () => {
 					<h1 className="text-2xl font-bold">Cartões de Crédito</h1>
 					<button
 						className="bg-purple-500 text-white p-2 rounded"
-						onClick={() => setIsModalOpen(true)}
+						onClick={() => {
+							setIsModalOpen(true);
+						}}
 					>
 						+ Adicionar Cartão
 					</button>
 				</div>
 			</div>
 			<div className="mt-4 flex-1 overflow-y-auto">
-				<ul className="space-y-4">
-					{cards.map((card, index) => (
-						<li key={index} className="flex justify-between items-center">
+				<ul className="space-y-2">
+					{creditCardsList?.map((card, index) => (
+						<li
+							key={index}
+							className="flex justify-between items-center p-4 border rounded hover:bg-gray-100 transition-colors"
+						>
 							<div className="flex items-center">
 								<span className="text-xl mr-4">💳</span>
 								<span>{card.name}</span>
+							</div>
+							<div className="flex space-x-4">
+								<button
+									className="text-blue-500 hover:text-blue-700"
+									onClick={() => handleSeeCreditCard(card.id!)}
+								>
+									Ver
+								</button>
+								<button
+									className="text-red-500 hover:text-red-700"
+									onClick={() => handleDeleteCard(card.id!)}
+								>
+									Deletar
+								</button>
 							</div>
 						</li>
 					))}
 				</ul>
 			</div>
-			<CreditCardModal
-				isOpen={isModalOpen}
-				onClose={() => setIsModalOpen(false)}
-				onSave={handleSaveCard}
-			/>
+			{isModalOpen && (
+				<CreditCardModal
+					isOpen={isModalOpen}
+					onClose={() => setIsModalOpen(false)}
+					onSave={handleSaveCard}
+					infoCreditCards={infoCreditCards}
+					setInfoCreditCards={setInfoCreditCards}
+				/>
+			)}
 		</div>
 	);
 };

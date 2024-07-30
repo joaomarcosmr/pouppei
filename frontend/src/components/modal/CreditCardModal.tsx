@@ -1,39 +1,39 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { ICreditCard } from '../../Interfaces/CreditCard';
 
 interface CreditCardModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onSave: (card: CreditCard) => void;
+	onSave: () => void;
+	infoCreditCards: ICreditCard;
+	setInfoCreditCards: React.Dispatch<React.SetStateAction<ICreditCard>>;
 }
 
-interface CreditCard {
-	name: string;
-	limit: number;
-	closeDay: number;
-	dueDay: number;
-	defaultAccount: string;
-}
+const icons = [
+	'🍴', '📰', '🍸', '🏠', '🛍️', '💅', '💸', '🎓', '👨‍👩‍👧‍👦', '🧾', '🎨', '🛒',
+	'📈', '👨‍💻', '❤️', '⭐', '👤', '🎥', '🎵', '📷', '✉️', '🚩', '📚', '🚴', '🚗', '🚀', '🌟', '🔥', '⚡'
+];
 
-const CreditCardModal: React.FC<CreditCardModalProps> = ({ isOpen, onClose, onSave }) => {
-	const [card, setCard] = useState<CreditCard>({
-		name: '',
-		limit: 0,
-		closeDay: 1,
-		dueDay: 1,
-		defaultAccount: 'Conta inicial'
-	});
+const CreditCardModal: React.FC<CreditCardModalProps> = ({ isOpen, onClose, onSave, infoCreditCards, setInfoCreditCards }) => {
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 		const { name, value } = e.target;
-		setCard((prevCard) => ({
+		setInfoCreditCards((prevCard) => ({
 			...prevCard,
-			[name]: name === 'limit' ? parseFloat(value) : value,
+			[name]: name === 'credit_limit' ? parseFloat(value) : value,
+		}));
+	};
+
+	const handleIconChange = (icon: string) => {
+		setInfoCreditCards((prevCategory) => ({
+			...prevCategory,
+			icon,
 		}));
 	};
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		onSave(card);
+		onSave();
 		onClose();
 	};
 
@@ -51,6 +51,18 @@ const CreditCardModal: React.FC<CreditCardModalProps> = ({ isOpen, onClose, onSa
 				</div>
 				<h2 className="text-center text-2xl font-bold mb-6">Novo cartão</h2>
 				<form onSubmit={handleSubmit}>
+					<div className="flex flex-wrap mt-1">
+						{icons.map((icon, index) => (
+							<button
+								key={index}
+								type="button"
+								className={`w-8 h-8 rounded-full mr-2 mb-2 ${infoCreditCards.icon === icon ? 'ring-2 ring-offset-2 ring-purple-600' : ''}`}
+								onClick={() => handleIconChange(icon)}
+							>
+								<span className="text-xl">{icon}</span>
+							</button>
+						))}
+					</div>
 					<div className="mb-4">
 						<label className="block text-gray-700" htmlFor="name">Nome do cartão</label>
 						<input
@@ -60,30 +72,30 @@ const CreditCardModal: React.FC<CreditCardModalProps> = ({ isOpen, onClose, onSa
 							className="w-full p-2 border border-gray-300 rounded mt-1"
 							placeholder="Dê um nome para identificar este cartão"
 							onChange={handleInputChange}
-							value={card.name}
+							value={infoCreditCards.name}
 						/>
 					</div>
 					<div className="mb-4">
-						<label className="block text-gray-700" htmlFor="limit">Limite</label>
+						<label className="block text-gray-700" htmlFor="credit_limit">Limite</label>
 						<input
-							id="limit"
-							name="limit"
+							id="credit_limit"
+							name="credit_limit"
 							type="number"
 							className="w-full p-2 border border-gray-300 rounded mt-1"
 							placeholder="R$ 0,00"
 							onChange={handleInputChange}
-							value={card.limit}
+							value={infoCreditCards.credit_limit}
 						/>
 					</div>
-					<div className="mb-4 flex space-x-4">
-						<div>
-							<label className="block text-gray-700" htmlFor="closeDay">Fecha dia</label>
+					<div className="mb-4 flex">
+						<div className='w-1/2 pr-2'>
+							<label className="block text-gray-700" htmlFor="close_date">Fecha dia</label>
 							<select
-								id="closeDay"
-								name="closeDay"
+								id="close_date"
+								name="close_date"
 								className="w-full p-2 border border-gray-300 rounded mt-1"
 								onChange={handleInputChange}
-								value={card.closeDay}
+								value={infoCreditCards.close_date}
 							>
 								{Array.from({ length: 31 }, (_, i) => (
 									<option key={i + 1} value={i + 1}>
@@ -92,14 +104,14 @@ const CreditCardModal: React.FC<CreditCardModalProps> = ({ isOpen, onClose, onSa
 								))}
 							</select>
 						</div>
-						<div>
-							<label className="block text-gray-700" htmlFor="dueDay">Vence dia</label>
+						<div className='w-1/2 pl-2'>
+							<label className="block text-gray-700" htmlFor="due_date">Vence dia</label>
 							<select
-								id="dueDay"
-								name="dueDay"
+								id="due_date"
+								name="due_date"
 								className="w-full p-2 border border-gray-300 rounded mt-1"
 								onChange={handleInputChange}
-								value={card.dueDay}
+								value={infoCreditCards.due_date}
 							>
 								{Array.from({ length: 31 }, (_, i) => (
 									<option key={i + 1} value={i + 1}>
@@ -116,10 +128,9 @@ const CreditCardModal: React.FC<CreditCardModalProps> = ({ isOpen, onClose, onSa
 							name="defaultAccount"
 							className="w-full p-2 border border-gray-300 rounded mt-1"
 							onChange={handleInputChange}
-							value={card.defaultAccount}
+							value={infoCreditCards.icon}
 						>
 							<option value="Conta inicial">Conta inicial</option>
-							{/* Add other account options here */}
 						</select>
 					</div>
 					<button
